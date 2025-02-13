@@ -27,7 +27,7 @@ function RootLayout() {
 
   useEffect(() => {
     if (!user) {
-      router.replace('/auth/login');
+      router.replace('/(auth)/login');
     }
   }, [user]);
 

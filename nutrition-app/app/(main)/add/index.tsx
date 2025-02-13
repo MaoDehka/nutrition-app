@@ -1,20 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { View, Text, TextInput, Button, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useMealContext } from '../contexts/MealContext';  
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useMealContext } from '../contexts/MealContext';
 
 const API_ID = process.env.EXPO_PUBLIC_EDAMAM_APP_ID;
 const API_KEY = process.env.EXPO_PUBLIC_EDAMAM_API_KEY;
 
 export default function AddMeal() {
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [meals, setMeals] = useState<any[]>([]); 
-  const [selectedMeals, setSelectedMeals] = useState<any[]>([]); 
+  const [meals, setMeals] = useState<any[]>([]);
+  const [selectedMeals, setSelectedMeals] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showResults, setShowResults] = useState<boolean>(true);
   const router = useRouter();
-  const { addRecipe } = useMealContext(); 
+  const { addRecipe } = useMealContext();
+
+  const { product } = useLocalSearchParams<{ product: string }>();
+
+  useEffect(() => {
+    if (product) {
+      searchProductByBarcode(product); 
+    }
+  }, [product]);
 
   const searchMeals = async () => {
     if (!searchQuery) return;
@@ -49,9 +57,40 @@ export default function AddMeal() {
     }
   };
 
+  const searchProductByBarcode = async (barcode: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `https://api.edamam.com/api/food-database/v2/parser?app_id=${API_ID}&app_key=${API_KEY}&ingr=${barcode}`
+      );
+      const data = await response.json();
+
+      if (data && data.hints && Array.isArray(data.hints)) {
+        const fetchedMeals = data.hints.map((meal: any, index: number) => ({
+          id: `${meal.food.foodId}-${index}`,
+          label: meal.food.label,
+          calories: meal.food.nutrients.ENERC_KCAL,
+          image: meal.food.image || 'https://via.placeholder.com/50',
+        }));
+        setMeals(fetchedMeals);
+        setShowResults(true);
+      } else {
+        setError('Aucun aliment trouvé pour ce code-barres');
+        setMeals([]);
+      }
+    } catch (error) {
+      console.error('Erreur de récupération des aliments par code-barres:', error);
+      setError('Une erreur est survenue');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addMealToSelected = (meal: any) => {
     setSelectedMeals([...selectedMeals, meal]);
-    setShowResults(false); 
+    setShowResults(false);
   };
 
   const handleSaveMeals = () => {
@@ -60,13 +99,14 @@ export default function AddMeal() {
         id: `recipe-${Date.now()}`,
         ingredients: selectedMeals,
       };
-      addRecipe(newRecipe); 
-      setSelectedMeals([]); 
+      addRecipe(newRecipe);
+      setSelectedMeals([]);
+      router.push('/');
     }
   };
 
   const navigateToCamera = () => {
-    router.push('/add/camera'); 
+    router.push('/add/camera');
   };
 
   return (
@@ -120,8 +160,8 @@ export default function AddMeal() {
           />
         </View>
       )}
-       <Button title="Scanner un Code-Barres" onPress={navigateToCamera} />
 
+      <Button title="Scanner un Code-Barres" onPress={navigateToCamera} />
       <Button title="Sauvegarder la recette" onPress={handleSaveMeals} />
     </View>
   );

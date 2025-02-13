@@ -12,7 +12,11 @@ export default function Home() {
   };
 
   const handleRecipeDetail = (recipeId: string) => {
-    router.push(`/recipe/${recipeId}`);
+    router.push(`/${recipeId}`);
+  };
+
+  const handleGoToProfile = () => {
+    router.push('/profile');
   };
 
   return (
@@ -20,6 +24,7 @@ export default function Home() {
       <Text style={{ fontSize: 24, marginBottom: 10 }}>Liste des recettes</Text>
 
       <Button title="Ajouter une recette" onPress={handleAddRecipe} />
+      <Button title="Mon Profil" onPress={handleGoToProfile} /> 
 
       {recipes.length === 0 ? (
         <Text>Aucune recette disponible.</Text>
@@ -30,7 +35,7 @@ export default function Home() {
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleRecipeDetail(item.id)}>
               <View style={{ marginVertical: 10 }}>
-                <Text style={{ fontWeight: 'bold', fontSize: 18 }}>{item.id}</Text> 
+                <Text style={{ fontWeight: 'bold', fontSize: 18 }}>{item.id}</Text>
                 <FlatList
                   data={item.ingredients}
                   keyExtractor={(ingredient) => ingredient.id}
