@@ -101,7 +101,7 @@ export default function AddMeal() {
       };
       addRecipe(newRecipe);
       setSelectedMeals([]);
-      router.push('/');
+      router.push('/'); 
     }
   };
 
