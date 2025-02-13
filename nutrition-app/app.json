@@ -3,7 +3,7 @@
     "name": "nutrition-app",
     "slug": "nutrition-app",
     "version": "1.0.0",
-    "scheme":"expo-router/entry",
+    "scheme": "expo-router/entry",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,6 +13,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "permissions": ["CAMERA"],
     "ios": {
       "supportsTablet": true
     },
@@ -23,10 +24,13 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-secure-store",
+      "expo-barcode-scanner"
     ]
   }
 }
